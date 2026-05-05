@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>La Tijera – Barbería Maulina, Linares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+/* ── Variables ─────────────────────────────────── */
+:root {
+  --bg:      #0a0a0a;
+  --bg2:     #111111;
+  --card:    #161616;
+  --card2:   #1e1e1e;
+  --accent:  #f5c518;
+  --accent2: #e6b400;
+  --white:   #ffffff;
+  --muted:   rgba(255,255,255,.45);
+  --border:  rgba(255,255,255,.08);
+  --radius:  16px;
+  --trans:   .3s cubic-bezier(.4,0,.2,1);
+  --font-h:  'Syne', sans-serif;
+  --font-b:  'Inter', sans-serif;
+}
+
+/* ── Reset ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
+body {
+  height: 100%;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  background: #050505;
+  font-family: var(--font-b);
+  color: var(--white);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, [onclick], .barber-card, .time-slot, .day-chip, .service-toggle {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button { font-family: var(--font-b); }
+img { display: block; }
+
+/* ── Shell: MÓVIL = full screen por defecto ────── */
+.shell {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.phone {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ── Frame (tablet 540px–1099px) ──────────────── */
+@media (min-width: 540px) and (max-width: 1099px) {
+  .shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .phone {
+    width: 390px;
+    height: 844px;
+    border-radius: 48px;
+    box-shadow: 0 0 0 10px #111, 0 0 0 12px #1a1a1a, 0 40px 80px rgba(0,0,0,.8);
+    overflow: hidden;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 32px;
+    background: #080808;
+    border-radius: 0 0 18px 18px;
+    z-index: 9999;
+  }
+}
+
+/* ── Screens ───────────────────────────────────── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  transition: opacity var(--trans), transform var(--trans);
+  will-change: opacity, transform;
+  overflow: hidden;
+}
+
+.screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(32px);
+}
+
+.screen.slide-left.hidden { transform: translateX(-32px); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SPLASH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#splash {
+  justify-content: flex-end;
+  padding-bottom: 52px;
+  background:
+    linear-gradient(to bottom,
+      rgba(5,5,5,.05) 0%,
+      rgba(5,5,5,.65) 50%,
+      rgba(5,5,5,.98) 100%),
+    url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=900&q=80')
+    center/cover no-repeat;
+}
+
+.splash-badge {
+  position: absolute;
+  top: 52px; right: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+}
+
+.splash-flag {
+  padding: 0 28px;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+
+.splash-flag small {
+  font-size: 11px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+
+.splash-brand {
+  padding: 0 28px;
+  font-family: var(--font-h);
+  font-size: 64px; font-weight: 800;
+  line-height: .95; letter-spacing: -2px;
+  margin-bottom: 8px;
+}
+
+.splash-brand em {
+  display: block; font-style: normal;
+  color: var(--accent); font-size: 28px;
+  letter-spacing: 0px; font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.splash-sub {
+  padding: 0 28px; margin-bottom: 36px;
+  font-size: 15px; color: var(--muted); line-height: 1.6;
+}
+
+.btn-splash {
+  margin: 0 28px;
+  background: var(--accent);
+  color: #0a0a0a; border: none; border-radius: 50px;
+  padding: 18px 32px;
+  font-family: var(--font-h);
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(245,197,24,.3);
+  transition: transform .15s, filter .15s;
+}
+
+.btn-splash:hover  { filter: brightness(1.1); }
+.btn-splash:active { transform: scale(.97); }
+
+.btn-splash .arr {
+  background: rgba(0,0,0,.15);
+  border-radius: 50%; width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HOME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#home {
+  background: var(--bg);
+  flex-direction: row;
+}
+
+.sidebar { display: none; }
+
+.home-main {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* scrollable content area */
+.home-scroll {
+  flex: 1; overflow-y: auto;
+  padding-top: 42px;
+}
+
+.home-scroll::-webkit-scrollbar { display: none; }
+
+/* topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px 16px; flex-shrink: 0;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+
+.avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--card2); overflow: hidden;
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.topbar-greet small { font-size: 11px; color: var(--muted); display: block; }
+.topbar-greet strong { font-size: 15px; font-weight: 700; font-family: var(--font-h); }
+
+.topbar-right { display: flex; gap: 8px; }
+
+.icon-btn {
+  background: var(--card); border: none; border-radius: 12px;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--white);
+  position: relative;
+}
+
+.notif-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+}
+
+/* search */
+.search-wrap {
+  margin: 0 22px 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.search-box {
+  flex: 1; background: var(--card); border-radius: 14px;
+  padding: 13px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--white); font-size: 14px; width: 100%;
+  font-family: var(--font-b);
+}
+
+.search-box input::placeholder { color: var(--muted); }
+.search-box .ico { color: var(--muted); font-size: 16px; }
+
+.filter-btn {
+  background: var(--card); border: none; border-radius: 14px;
+  width: 46px; height: 46px; color: var(--white); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* last visit */
+.section-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); padding: 0 22px 10px;
+}
+
+.last-visit-card {
+  margin: 0 22px 22px;
+  background: var(--card); border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: border-color .2s;
+}
+
+.last-visit-card:hover { border-color: rgba(245,197,24,.3); }
+
+.lv-img {
+  width: 52px; height: 52px; border-radius: 12px;
+  object-fit: cover; flex-shrink: 0;
+}
+
+.lv-info { flex: 1; }
+.lv-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; font-family: var(--font-h); }
+.lv-meta { font-size: 11px; color: var(--muted); }
+
+.lv-badge {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  white-space: nowrap;
+}
+
+/* barber cards */
+.barbers-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; padding: 0 22px 30px;
+}
+
+.barber-card {
+  background: var(--card); border-radius: var(--radius);
+  overflow: hidden; cursor: pointer;
+  border: 1px solid var(--border);
+  transition: transform .15s, border-color .2s;
+}
+
+.barber-card:active { transform: scale(.97); }
+.barber-card:hover  { border-color: rgba(245,197,24,.25); }
+
+.barber-card-img {
+  position: relative; height: 140px; overflow: hidden;
+}
+
+.barber-card-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .4s;
+}
+
+.barber-card:hover .barber-card-img img { transform: scale(1.05); }
+
+.barber-avail {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+  border-radius: 6px; padding: 3px 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .5px;
+}
+
+.barber-avail.open  { color: #4ade80; }
+.barber-avail.busy  { color: #f87171; }
+
+.barber-card-body { padding: 12px; }
+.barber-card-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; font-family: var(--font-h); }
+.barber-card-title{ font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+.barber-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent); font-weight: 600; }
+.rating small { color: var(--muted); font-weight: 400; }
+
+.book-btn {
+  background: var(--accent); color: #0a0a0a;
+  border: none; border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px; font-weight: 700;
+  font-family: var(--font-h);
+  transition: filter .15s;
+}
+
+.book-btn:hover { filter: brightness(1.1); }
+
+/* services preview */
+.services-row {
+  display: flex; gap: 10px;
+  padding: 0 22px 24px;
+  overflow-x: auto; scrollbar-width: none;
+}
+
+.services-row::-webkit-scrollbar { display: none; }
+
+.svc-chip {
+  flex-shrink: 0; background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 14px;
+  text-align: center;
+}
+
+.svc-chip .sn { font-size: 13px; font-weight: 700; white-space: nowrap; font-family: var(--font-h); }
+.svc-chip .sp { font-size: 12px; color: var(--accent); margin-top: 2px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BARBER DETAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#barber { background: var(--bg); }
+
+.barber-hero {
+  position: relative; flex-shrink: 0;
+  height: 280px; overflow: hidden;
+}
+
+.barber-hero img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.barber-hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.2) 0%, rgba(10,10,10,.9) 100%);
+}
+
+.hero-btns {
+  position: absolute; top: 16px;
+  display: flex; justify-content: space-between;
+  width: 100%; padding: 0 16px;
+  z-index: 2;
+}
+
+.hero-btn {
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(8px);
+  border: none; border-radius: 50%;
+  width: 40px; height: 40px; color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.barber-hero-info {
+  position: absolute; bottom: 16px; left: 20px; right: 20px;
+  z-index: 2;
+}
+
+.barber-pro-badge {
+  display: inline-block;
+  background: var(--accent); color: #0a0a0a;
+  font-size: 9px; font-weight: 800;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+  font-family: var(--font-h);
+  margin-bottom: 6px;
+}
+
+.barber-hero-name {
+  font-family: var(--font-h);
+  font-size: 26px; font-weight: 800;
+  line-height: 1; margin-bottom: 4px;
+}
+
+.barber-hero-rating {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--accent); font-weight: 600;
+}
+
+.barber-hero-rating span { color: var(--muted); font-weight: 400; }
+
+/* body */
+.barber-body {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.barber-body::-webkit-scrollbar { display: none; }
+
+/* next slot */
+.next-slot {
+  margin: 16px 20px;
+  background: var(--card); border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.next-slot-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.next-slot-time  { font-size: 16px; font-weight: 700; font-family: var(--font-h); }
+
+.edit-btn {
+  background: none; border: none;
+  color: var(--muted); font-size: 18px;
+}
+
+/* services list */
+.services-title {
+  padding: 4px 20px 10px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted);
+}
+
+.service-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.service-item:last-child { border-bottom: none; }
+
+.svc-info { flex: 1; }
+.svc-name { font-size: 14px; font-weight: 700; font-family: var(--font-h); margin-bottom: 2px; }
+.svc-meta { font-size: 12px; color: var(--muted); }
+.svc-price { font-size: 15px; font-weight: 700; color: var(--accent); margin-right: 14px; }
+
+/* toggle switch */
+.toggle {
+  flex-shrink: 0;
+  width: 46px; height: 26px;
+  background: var(--card2); border-radius: 13px;
+  position: relative; cursor: pointer;
+  transition: background .2s;
+  border: none;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 22px;
+  background: var(--muted); border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform .2s, background .2s;
+}
+
+.toggle.on { background: var(--accent); }
+.toggle.on::after { transform: translateX(20px); background: #0a0a0a; }
+
+/* bottom bar */
+.barber-bar {
+  flex-shrink: 0;
+  background: var(--card); border-radius: 24px 24px 0 0;
+  padding: 16px 20px 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+
+.total-info { flex: 1; }
+.total-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.total-amount { font-size: 22px; font-weight: 800; font-family: var(--font-h); color: var(--accent); }
+.total-time   { font-size: 11px; color: var(--muted); }
+
+.btn-book {
+  background: var(--accent); color: #0a0a0a;
+  border: none; border-radius: 50px;
+  padding: 16px 28px;
+  font-family: var(--font-h);
+  font-size: 15px; font-weight: 800;
+  transition: transform .15s, filter .15s;
+  box-shadow: 0 6px 20px rgba(245,197,24,.3);
+  white-space: nowrap;
+}
+
+.btn-book:hover  { filter: brightness(1.1); }
+.btn-book:active { transform: scale(.97); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BOOKING (Date & Time)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#booking { background: var(--bg); }
+
+.booking-header {
+  flex-shrink: 0;
+  padding: 52px 20px 16px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.booking-header .back-btn {
+  background: var(--card); border: none; border-radius: 50%;
+  width: 40px; height: 40px; color: var(--white); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.booking-header h2 {
+  font-family: var(--font-h);
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+}
+
+.booking-body {
+  flex: 1; overflow-y: auto; padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.booking-body::-webkit-scrollbar { display: none; }
+
+/* month nav */
+.month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.month-nav h3 {
+  font-family: var(--font-h);
+  font-size: 18px; font-weight: 700;
+}
+
+.month-arrow {
+  background: var(--card); border: none; border-radius: 10px;
+  width: 38px; height: 38px; color: var(--white); font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* date strip */
+.date-strip {
+  display: flex; gap: 8px;
+  overflow-x: auto; scrollbar-width: none;
+  padding-bottom: 4px; margin-bottom: 24px;
+}
+
+.date-strip::-webkit-scrollbar { display: none; }
+
+.day-chip {
+  flex-shrink: 0;
+  background: var(--card); border-radius: 14px;
+  padding: 10px 8px; min-width: 52px;
+  text-align: center; cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all .2s;
+}
+
+.day-chip .dn { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.day-chip .dd { font-size: 20px; font-weight: 800; font-family: var(--font-h); margin: 2px 0; }
+.day-chip .da { font-size: 9px; color: var(--muted); }
+
+.day-chip.active {
+  background: var(--accent); border-color: var(--accent);
+}
+.day-chip.active .dn,
+.day-chip.active .dd,
+.day-chip.active .da { color: #0a0a0a; }
+
+.day-chip.today .dd { color: var(--accent); }
+.day-chip.today.active .dd { color: #0a0a0a; }
+
+/* time section */
+.booking-section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.time-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-bottom: 8px;
+}
+
+.time-slot {
+  background: var(--card); border-radius: 12px;
+  padding: 12px 6px; text-align: center;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: all .2s; color: var(--white);
+  font-family: var(--font-h);
+}
+
+.time-slot.taken {
+  color: var(--muted); cursor: not-allowed;
+  background: var(--bg2); text-decoration: line-through;
+}
+
+.time-slot.active {
+  background: var(--accent); border-color: var(--accent);
+  color: #0a0a0a;
+}
+
+.time-slot:not(.taken):not(.active):hover {
+  border-color: rgba(245,197,24,.4);
+}
+
+/* booking bar */
+.booking-bar {
+  flex-shrink: 0;
+  background: var(--card); border-radius: 24px 24px 0 0;
+  padding: 16px 20px 28px;
+}
+
+.booking-summary {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+
+.bs-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.bs-val   { font-size: 15px; font-weight: 700; font-family: var(--font-h); }
+
+.btn-save {
+  width: 100%;
+  background: var(--accent); color: #0a0a0a;
+  border: none; border-radius: 50px;
+  padding: 18px; font-family: var(--font-h);
+  font-size: 16px; font-weight: 800;
+  box-shadow: 0 6px 20px rgba(245,197,24,.3);
+  transition: transform .15s, filter .15s;
+}
+
+.btn-save:active { transform: scale(.98); }
+.btn-save:hover  { filter: brightness(1.1); }
+.btn-save:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONFIRM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#confirm {
+  background: var(--bg);
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 28px;
+}
+
+.confirm-ring {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; margin-bottom: 24px;
+  animation: pop .5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes pop {
+  0%   { transform: scale(0); opacity: 0; }
+  70%  { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.confirm-title {
+  font-family: var(--font-h);
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -0.5px; margin-bottom: 8px;
+}
+
+.confirm-sub { color: var(--muted); font-size: 14px; line-height: 1.65; margin-bottom: 28px; }
+
+.confirm-card {
+  background: var(--card); border-radius: 18px;
+  padding: 20px; margin-bottom: 14px;
+  width: 100%; text-align: left;
+}
+
+.cc-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cc-row:last-child { border-bottom: none; }
+.cc-row .ci { font-size: 18px; flex-shrink: 0; }
+.cc-row .ck { font-size: 11px; color: var(--muted); margin-bottom: 1px; }
+.cc-row .cv { font-size: 14px; font-weight: 700; font-family: var(--font-h); }
+
+.confirm-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+
+.btn-calendar {
+  background: var(--card); color: var(--white);
+  border: 1px solid var(--border); border-radius: 50px;
+  padding: 15px; font-family: var(--font-h);
+  font-size: 14px; font-weight: 700;
+}
+
+.btn-wsp {
+  background: #25d366; color: #fff;
+  border: none; border-radius: 50px;
+  padding: 15px; font-family: var(--font-h);
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+.btn-home {
+  background: none; border: none;
+  color: var(--muted); font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHARED COMPONENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.section-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px; margin-bottom: 10px;
+}
+
+.see-all {
+  font-size: 12px; color: var(--accent); font-weight: 600;
+  background: none; border: none;
+}
+
+#overlay-bg {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 90; opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+
+#overlay-bg.visible { opacity: 1; pointer-events: all; }
+
+.toast-wrap {
+  position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; pointer-events: none;
+}
+
+.toast {
+  background: rgba(20,20,20,.95); backdrop-filter: blur(12px);
+  border: 1px solid rgba(245,197,24,.2); color: var(--white);
+  padding: 11px 20px; border-radius: 50px;
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity .3s, transform .3s;
+}
+
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
+.rc { position: relative; overflow: hidden; }
+.re {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,.15); transform: scale(0);
+  animation: ripple .6s linear; pointer-events: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DESKTOP ≥ 1100px
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (min-width: 1100px) {
+
+  /* Home: sidebar + main */
+  #home {
+    display: flex !important;
+    flex-direction: row !important;
+    position: absolute; inset: 0;
+    transform: none !important; opacity: 1 !important;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    display: flex; flex-direction: column;
+    width: 260px; flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 32px 20px;
+    overflow-y: auto; gap: 28px;
+  }
+
+  .sidebar::-webkit-scrollbar { display: none; }
+
+  .sb-brand { display: flex; align-items: center; gap: 12px; }
+
+  .sb-logo {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+
+  .sb-name {
+    font-family: var(--font-h);
+    font-size: 18px; font-weight: 800; line-height: 1.1;
+  }
+
+  .sb-sub {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sb-section { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+  .sb-nav { display: flex; flex-direction: column; gap: 3px; }
+
+  .sb-nav-btn {
+    background: transparent; border: none;
+    color: var(--muted); font-size: 14px; font-weight: 500;
+    padding: 10px 12px; border-radius: 12px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; text-align: left; width: 100%;
+    font-family: var(--font-b);
+    transition: all .2s;
+  }
+
+  .sb-nav-btn:hover  { background: var(--card); color: var(--white); }
+  .sb-nav-btn.active { background: var(--card); color: var(--white); }
+  .sb-nav-btn .sbi  { font-size: 16px; }
+
+  .sb-divider { height: 1px; background: var(--border); }
+
+  .sb-info { display: flex; flex-direction: column; gap: 10px; }
+
+  .sb-info-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--muted); line-height: 1.4;
+  }
+
+  .sb-info-row .si { font-size: 15px; flex-shrink: 0; }
+
+  .sb-cta {
+    background: var(--accent); color: #0a0a0a;
+    border: none; border-radius: 12px;
+    padding: 14px 16px; font-family: var(--font-h);
+    font-size: 14px; font-weight: 800;
+    width: 100%; cursor: pointer;
+    transition: filter .15s;
+  }
+
+  .sb-cta:hover { filter: brightness(1.1); }
+
+  /* Main area */
+  .home-main { height: 100%; }
+
+  .home-scroll {
+    padding-top: 0;
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg); padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .search-wrap  { margin: 24px 32px 0; }
+  .section-label, .section-row { padding: 0 32px; }
+  .section-row { padding: 0 32px; margin-bottom: 10px; }
+  .last-visit-card  { margin: 0 32px 22px; }
+  .services-row     { padding: 0 32px 22px; }
+
+  .barbers-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px; padding: 0 32px 32px;
+  }
+
+  /* Hide avatar on desktop (sidebar has branding) */
+  .topbar-left .avatar { display: none; }
+
+  /* Barber detail: right panel */
+  #barber {
+    position: absolute !important;
+    top: 0 !important; bottom: 0 !important;
+    right: 0 !important; left: auto !important;
+    width: 440px !important; height: 100% !important;
+    box-shadow: -8px 0 40px rgba(0,0,0,.7);
+    z-index: 100;
+    transform: translateX(100%) !important;
+    opacity: 1 !important;
+    transition: transform var(--trans) !important;
+  }
+
+  #barber:not(.hidden) {
+    transform: translateX(0) !important;
+    pointer-events: all !important;
+  }
+
+  /* Booking: right panel */
+  #booking {
+    position: absolute !important;
+    top: 0 !important; bottom: 0 !important;
+    right: 0 !important; left: auto !important;
+    width: 440px !important; height: 100% !important;
+    box-shadow: -8px 0 40px rgba(0,0,0,.7);
+    z-index: 101;
+    transform: translateX(100%) !important;
+    opacity: 1 !important;
+    transition: transform var(--trans) !important;
+  }
+
+  #booking:not(.hidden) {
+    transform: translateX(0) !important;
+    pointer-events: all !important;
+  }
+
+  /* Confirm: modal overlay */
+  #confirm {
+    background: rgba(0,0,0,.75) !important;
+    backdrop-filter: blur(10px);
+    z-index: 200;
+  }
+
+  /* Overlay */
+  #overlay-bg { z-index: 99; }
+
+  /* Toast */
+  .toast-wrap { position: fixed; }
+
+  /* Splash: full screen */
+  #splash {
+    background:
+      linear-gradient(to bottom, rgba(5,5,5,.05) 0%, rgba(5,5,5,.65) 50%, rgba(5,5,5,.98) 100%),
+      url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=1400&q=80')
+      center/cover no-repeat;
+    padding-bottom: 80px;
+  }
+
+  .splash-badge { top: 40px; right: 60px; width: 64px; height: 64px; font-size: 28px; }
+  .splash-flag  { padding: 0 60px; }
+  .splash-brand { font-size: 96px; padding: 0 60px; }
+  .splash-brand em { font-size: 36px; }
+  .splash-sub   { font-size: 17px; padding: 0 60px; max-width: 540px; }
+  .btn-splash   { margin: 0 60px; max-width: 340px; font-size: 17px; }
+}
+
+/* ── Wide desktop ≥ 1400px ────────────────────── */
+@media (min-width: 1400px) {
+  .sidebar { width: 280px; }
+  #barber, #booking { width: 480px !important; }
+  .barbers-grid { grid-template-columns: repeat(4, 1fr); }
+}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="phone" id="app">
+
+    <!-- ══════════ SPLASH ══════════ -->
+    <section class="screen" id="splash">
+      <div class="splash-badge">✂️</div>
+
+      <div class="splash-flag"><span>🇨🇱</span><small>Linares · VII Región</small></div>
+
+      <h1 class="splash-brand">
+        <em>La Tijera</em>
+        Maulina
+      </h1>
+      <p class="splash-sub">
+        Reserva tu hora con los mejores barberos de Linares. Cortes modernos, barba perfecta, estilo garantizado.
+      </p>
+
+      <button class="btn-splash rc" onclick="goTo('home')">
+        Reservar hora
+        <span class="arr">→</span>
+      </button>
+    </section>
+
+    <!-- ══════════ HOME ══════════ -->
+    <section class="screen hidden" id="home">
+
+      <!-- SIDEBAR (desktop) -->
+      <aside class="sidebar">
+        <div class="sb-brand">
+          <div class="sb-logo">✂️</div>
+          <div>
+            <div class="sb-name">La Tijera<br/>Maulina</div>
+            <div class="sb-sub">Desde 2015 · Linares</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sb-section">Navegación</div>
+          <div class="sb-nav">
+            <button class="sb-nav-btn active"><span class="sbi">🏠</span> Inicio</button>
+            <button class="sb-nav-btn"><span class="sbi">📅</span> Mis Reservas</button>
+            <button class="sb-nav-btn"><span class="sbi">✂️</span> Barberos</button>
+            <button class="sb-nav-btn"><span class="sbi">💈</span> Servicios</button>
+            <button class="sb-nav-btn"><span class="sbi">⭐</span> Reseñas</button>
+          </div>
+        </div>
+
+        <div class="sb-divider"></div>
+
+        <div class="sb-info">
+          <div class="sb-section">Información</div>
+          <div class="sb-info-row"><span class="si">⏰</span> Lun–Sáb 09:00–20:00 h</div>
+          <div class="sb-info-row"><span class="si">📍</span> Av. Valentín Letelier 420, Linares</div>
+          <div class="sb-info-row"><span class="si">📞</span> +56 9 8765 4321</div>
+          <div class="sb-info-row"><span class="si">💳</span> Efectivo · Webpay · MACH</div>
+        </div>
+
+        <div class="sb-divider"></div>
+
+        <button class="sb-cta rc" onclick="goTo('home')">✂️ &nbsp;Reservar ahora</button>
+      </aside>
+
+      <!-- MAIN -->
+      <div class="home-main">
+        <div class="home-scroll">
+
+          <!-- topbar -->
+          <div class="topbar">
+            <div class="topbar-left">
+              <div class="avatar">💈</div>
+              <div class="topbar-greet">
+                <small id="greeting-day">Buenos días</small>
+                <strong>¡Bienvenido! 👋</strong>
+              </div>
+            </div>
+            <div class="topbar-right">
+              <button class="icon-btn" style="font-size:18px">🔔
+                <div class="notif-dot"></div>
+              </button>
+              <button class="icon-btn" style="font-size:18px">⚙️</button>
+            </div>
+          </div>
+
+          <!-- search -->
+          <div class="search-wrap">
+            <div class="search-box">
+              <span class="ico">🔍</span>
+              <input type="text" placeholder="Buscar barbero o servicio…" onkeyup="searchBarbers(this.value)" />
+            </div>
+            <button class="filter-btn">🎛️</button>
+          </div>
+
+          <!-- last visit -->
+          <div class="section-label">ÚLTIMA VISITA</div>
+          <div class="last-visit-card rc" onclick="openBarber(0)">
+            <img class="lv-img"
+              src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=200&q=80"
+              alt="Carlos Muñoz"
+              onerror="this.style.display='none'"
+            />
+            <div class="lv-info">
+              <div class="lv-name">Carlos Muñoz</div>
+              <div class="lv-meta">⭐ 4.9 · 203 reseñas · Master Barber</div>
+            </div>
+            <div class="lv-badge">Reservar →</div>
+          </div>
+
+          <!-- servicios -->
+          <div class="section-label">SERVICIOS POPULARES</div>
+          <div class="services-row">
+            <div class="svc-chip"><div class="sn">Corte Clásico</div><div class="sp">$5.000</div></div>
+            <div class="svc-chip"><div class="sn">Fade</div><div class="sp">$6.000</div></div>
+            <div class="svc-chip"><div class="sn">Barba</div><div class="sp">$4.000</div></div>
+            <div class="svc-chip"><div class="sn">Corte+Barba</div><div class="sp">$8.500</div></div>
+            <div class="svc-chip"><div class="sn">Niños</div><div class="sp">$4.000</div></div>
+          </div>
+
+          <!-- barberos -->
+          <div class="section-row">
+            <div class="section-label" style="padding:0;margin:0">BARBEROS DISPONIBLES</div>
+            <button class="see-all">Ver todos →</button>
+          </div>
+
+          <div class="barbers-grid" id="barbers-grid"></div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ BARBER DETAIL ══════════ -->
+    <section class="screen hidden" id="barber">
+      <div class="barber-hero">
+        <img id="barber-hero-img" src="" alt="" />
+        <div class="hero-btns">
+          <button class="hero-btn" onclick="goBack()">←</button>
+          <button class="hero-btn" id="fav-btn" onclick="toggleFav(this)">🤍</button>
+        </div>
+        <div class="barber-hero-info">
+          <div class="barber-pro-badge" id="barber-badge">PRO BARBER</div>
+          <div class="barber-hero-name" id="barber-name">Carlos Muñoz</div>
+          <div class="barber-hero-rating">
+            ⭐ <span id="barber-rating">4.9</span>
+            <span id="barber-reviews">• 203 reseñas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="barber-body">
+        <div class="next-slot">
+          <div>
+            <div class="next-slot-label">PRÓXIMO DISPONIBLE</div>
+            <div class="next-slot-time" id="next-slot">HOY · 15:00 – 15:30</div>
+          </div>
+          <button class="edit-btn">✏️</button>
+        </div>
+
+        <div class="services-title">SERVICIOS</div>
+        <div id="services-list"></div>
+      </div>
+
+      <div class="barber-bar">
+        <div class="total-info">
+          <div class="total-label">TOTAL</div>
+          <div class="total-amount" id="total-amount">$5.000</div>
+          <div class="total-time" id="total-time">⏱ 30 min</div>
+        </div>
+        <button class="btn-book rc" onclick="goTo('booking')">
+          RESERVAR HORA ✂️
+        </button>
+      </div>
+    </section>
+
+    <!-- ══════════ BOOKING ══════════ -->
+    <section class="screen hidden" id="booking">
+      <div class="booking-header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <h2>FECHA Y HORA</h2>
+      </div>
+
+      <div class="booking-body">
+        <div class="month-nav">
+          <button class="month-arrow" onclick="changeMonth(-1)">←</button>
+          <h3 id="month-label">AGOSTO 2025</h3>
+          <button class="month-arrow" onclick="changeMonth(1)">→</button>
+        </div>
+
+        <div class="booking-section-label">FECHA</div>
+        <div class="date-strip" id="date-strip"></div>
+
+        <div class="booking-section-label">HORA</div>
+        <div class="time-grid" id="time-grid"></div>
+      </div>
+
+      <div class="booking-bar">
+        <div class="booking-summary">
+          <div>
+            <div class="bs-label">FECHA SELECCIONADA</div>
+            <div class="bs-val" id="bs-date">—</div>
+          </div>
+          <div style="text-align:right">
+            <div class="bs-label">HORA</div>
+            <div class="bs-val" id="bs-time">—</div>
+          </div>
+        </div>
+        <button class="btn-save rc" id="btn-save" onclick="confirmBooking()" disabled>
+          CONFIRMAR RESERVA
+        </button>
+      </div>
+    </section>
+
+    <!-- ══════════ CONFIRM ══════════ -->
+    <section class="screen hidden" id="confirm">
+      <div class="confirm-ring">✓</div>
+      <h2 class="confirm-title">¡Reserva confirmada!</h2>
+      <p class="confirm-sub">Te esperamos en La Tijera Maulina.<br/>Te avisaremos 1 hora antes por WhatsApp 💬</p>
+
+      <div class="confirm-card">
+        <div class="cc-row"><span class="ci">✂️</span><div><div class="ck">BARBERO</div><div class="cv" id="cc-barber">—</div></div></div>
+        <div class="cc-row"><span class="ci">📅</span><div><div class="ck">FECHA Y HORA</div><div class="cv" id="cc-date">—</div></div></div>
+        <div class="cc-row"><span class="ci">💈</span><div><div class="ck">SERVICIO</div><div class="cv" id="cc-svc">—</div></div></div>
+        <div class="cc-row"><span class="ci">💵</span><div><div class="ck">TOTAL</div><div class="cv" id="cc-total">—</div></div></div>
+        <div class="cc-row"><span class="ci">📍</span><div><div class="ck">DIRECCIÓN</div><div class="cv">Av. Valentín Letelier 420, Linares</div></div></div>
+      </div>
+
+      <div class="confirm-btns">
+        <button class="btn-wsp" onclick="shareWhatsapp()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.557 4.126 1.526 5.855L0 24l6.305-1.654A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.373l-.36-.213-3.731.979.996-3.636-.235-.374A9.789 9.789 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
+          Compartir por WhatsApp
+        </button>
+        <button class="btn-calendar" onclick="resetApp()">← Volver al inicio</button>
+      </div>
+    </section>
+
+    <div id="overlay-bg" onclick="panelBack()"></div>
+    <div class="toast-wrap"><div class="toast" id="toast"></div></div>
+  </div>
+</div>
+
+<script>
+/* ── DATA ──────────────────────────────────────── */
+const BARBERS = [
+  {
+    id: 0, name: 'Carlos Muñoz', title: 'Master Barber', badge: 'MASTER BARBER',
+    rating: 4.9, reviews: 203, exp: '8 años', available: true,
+    img: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=600&q=80',
+    hero: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80',
+    next: 'HOY · 15:00 – 15:30',
+    services: [
+      { id:0, name:'Corte Clásico',   price:5000, time:30, on:true  },
+      { id:1, name:'Fade/Degradado',  price:6000, time:40, on:false },
+      { id:2, name:'Arreglo de Barba',price:4000, time:20, on:false },
+      { id:3, name:'Corte + Barba',   price:8500, time:50, on:false },
+    ],
+  },
+  {
+    id: 1, name: 'Diego Pérez', title: 'Pro Barber', badge: 'PRO BARBER',
+    rating: 4.7, reviews: 118, exp: '5 años', available: true,
+    img: 'https://images.unsplash.com/photo-1599351431613-18ef1fdd27e1?w=600&q=80',
+    hero: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800&q=80',
+    next: 'HOY · 16:30 – 17:00',
+    services: [
+      { id:0, name:'Corte Clásico',   price:5000, time:30, on:true  },
+      { id:1, name:'Skin Fade',       price:6500, time:45, on:false },
+      { id:2, name:'Diseño de Línea', price:3500, time:15, on:false },
+      { id:3, name:'Corte Niños',     price:4000, time:25, on:false },
+    ],
+  },
+  {
+    id: 2, name: 'Matías Rojas', title: 'Barber', badge: 'BARBER',
+    rating: 4.6, reviews: 87, exp: '3 años', available: false,
+    img: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=600&q=80',
+    hero: 'https://images.unsplash.com/photo-1599351431613-18ef1fdd27e1?w=800&q=80',
+    next: 'MAÑANA · 10:00',
+    services: [
+      { id:0, name:'Corte Clásico',    price:4500, time:30, on:true  },
+      { id:1, name:'Buzz Cut',         price:4000, time:20, on:false },
+      { id:2, name:'Afeitado Clásico', price:5000, time:35, on:false },
+    ],
+  },
+  {
+    id: 3, name: 'Sebastián López', title: 'Pro Barber', badge: 'PRO BARBER',
+    rating: 4.8, reviews: 156, exp: '6 años', available: true,
+    img: 'https://images.unsplash.com/photo-1634926878768-2a5b3c42f139?w=600&q=80',
+    hero: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800&q=80',
+    next: 'HOY · 18:00 – 18:30',
+    services: [
+      { id:0, name:'Corte Clásico',   price:5000, time:30, on:true  },
+      { id:1, name:'Fade + Barba',    price:9000, time:55, on:false },
+      { id:2, name:'Arreglo Barba',   price:4000, time:20, on:false },
+      { id:3, name:'Corte + Barba',   price:8500, time:50, on:false },
+    ],
+  },
+];
+
+const TAKEN_TIMES = ['09:30','11:00','12:00','14:30','16:30','18:00'];
+
+const DIAS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MESES_ES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                  'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+/* ── STATE ─────────────────────────────────────── */
+let nav           = ['splash'];
+let currentBarber = null;
+let selectedDate  = null;
+let selectedTime  = null;
+let bookingMonth  = new Date();
+
+/* ── NAVIGATION ────────────────────────────────── */
+function isDesktop() { return window.innerWidth >= 1100; }
+
+function goTo(id) {
+  const cur = nav[nav.length - 1];
+
+  if (isDesktop() && (id === 'barber' || id === 'booking')) {
+    document.getElementById(id).classList.remove('hidden');
+    document.getElementById('overlay-bg').classList.add('visible');
+  } else {
+    const el = document.getElementById(cur);
+    if (el) el.classList.add('hidden');
+    document.getElementById(id).classList.remove('hidden');
+    document.getElementById('overlay-bg').classList.remove('visible');
+  }
+  nav.push(id);
+}
+
+function goBack() {
+  if (nav.length <= 1) return;
+  const cur = nav.pop();
+  document.getElementById(cur).classList.add('hidden');
+
+  if (isDesktop() && (cur === 'barber' || cur === 'booking')) {
+    /* check if any other panel still open */
+    const hasPanel = nav.some(s => s === 'barber' || s === 'booking');
+    if (!hasPanel) document.getElementById('overlay-bg').classList.remove('visible');
+  } else {
+    const prev = nav[nav.length - 1];
+    if (prev) document.getElementById(prev).classList.remove('hidden');
+    document.getElementById('overlay-bg').classList.remove('visible');
+  }
+}
+
+function panelBack() {
+  /* clicking overlay closes topmost panel */
+  const topPanel = [...nav].reverse().find(s => s === 'barber' || s === 'booking');
+  if (topPanel) {
+    nav = nav.filter(s => s !== topPanel);
+    document.getElementById(topPanel).classList.add('hidden');
+    const hasPanel = nav.some(s => s === 'barber' || s === 'booking');
+    if (!hasPanel) document.getElementById('overlay-bg').classList.remove('visible');
+  }
+}
+
+/* ── RENDER BARBERS ─────────────────────────────── */
+function renderBarbers(list) {
+  document.getElementById('barbers-grid').innerHTML = list.map(b => `
+    <div class="barber-card rc" onclick="openBarber(${b.id})">
+      <div class="barber-card-img">
+        <img src="${b.img}" alt="${b.name}"
+          onerror="this.parentElement.innerHTML='<div style=\\'height:140px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:48px\\'>💈</div>'"
+          loading="lazy"
+        />
+        <div class="barber-avail ${b.available ? 'open' : 'busy'}">
+          ${b.available ? '● Disponible' : '● Ocupado'}
+        </div>
+      </div>
+      <div class="barber-card-body">
+        <div class="barber-card-name">${b.name}</div>
+        <div class="barber-card-title">${b.title} · ${b.exp}</div>
+        <div class="barber-card-footer">
+          <div class="rating">⭐ ${b.rating} <small>(${b.reviews})</small></div>
+          <button class="book-btn rc" onclick="event.stopPropagation();openBarber(${b.id})">Reservar</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderBarbers(BARBERS);
+
+/* ── OPEN BARBER ────────────────────────────────── */
+function openBarber(id) {
+  currentBarber = JSON.parse(JSON.stringify(BARBERS[id])); /* deep copy */
+
+  document.getElementById('barber-hero-img').src = currentBarber.hero;
+  document.getElementById('barber-name').textContent   = currentBarber.name;
+  document.getElementById('barber-badge').textContent  = currentBarber.badge;
+  document.getElementById('barber-rating').textContent = currentBarber.rating;
+  document.getElementById('barber-reviews').textContent = `· ${currentBarber.reviews} reseñas`;
+  document.getElementById('next-slot').textContent     = currentBarber.next;
+  document.getElementById('fav-btn').textContent = '🤍';
+  document.getElementById('fav-btn').classList.remove('liked');
+
+  renderServices();
+  updateTotal();
+  goTo('barber');
+}
+
+function renderServices() {
+  document.getElementById('services-list').innerHTML =
+    currentBarber.services.map(s => `
+      <div class="service-item">
+        <div class="svc-info">
+          <div class="svc-name">${s.name}</div>
+          <div class="svc-meta">${fmt(s.price)} · ${s.time} min</div>
+        </div>
+        <span class="svc-price">${fmt(s.price)}</span>
+        <button class="toggle ${s.on ? 'on' : ''}" onclick="toggleService(${s.id})"></button>
+      </div>
+    `).join('');
+}
+
+function toggleService(sid) {
+  currentBarber.services.forEach(s => { if (s.id === sid) s.on = !s.on; });
+  renderServices();
+  updateTotal();
+}
+
+function updateTotal() {
+  const active = currentBarber.services.filter(s => s.on);
+  const price  = active.reduce((a, s) => a + s.price, 0);
+  const time   = active.reduce((a, s) => a + s.time, 0);
+  document.getElementById('total-amount').textContent = fmt(price || currentBarber.services[0].price);
+  document.getElementById('total-time').textContent   = `⏱ ${time || currentBarber.services[0].time} min`;
+}
+
+function toggleFav(btn) {
+  btn.classList.toggle('liked');
+  btn.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
+  if (btn.classList.contains('liked')) showToast('¡Guardado en favoritos!');
+}
+
+/* ── BOOKING ────────────────────────────────────── */
+bookingMonth = new Date();
+bookingMonth.setDate(1);
+
+function renderCalendar() {
+  const y = bookingMonth.getFullYear();
+  const m = bookingMonth.getMonth();
+  document.getElementById('month-label').textContent = `${MESES_ES[m]} ${y}`;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  /* show next 14 days from today */
+  const strip = document.getElementById('date-strip');
+  const days  = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    days.push(d);
+  }
+
+  strip.innerHTML = days.map((d, i) => {
+    const isToday   = d.getTime() === today.getTime();
+    const isSelected = selectedDate && d.toDateString() === selectedDate.toDateString();
+    return `
+      <div class="day-chip ${isToday ? 'today' : ''} ${isSelected ? 'active' : ''}"
+           onclick="selectDate(${d.getTime()})">
+        <div class="dn">${DIAS_ES[d.getDay()]}</div>
+        <div class="dd">${d.getDate()}</div>
+        <div class="da">${MESES_ES[d.getMonth()].slice(0,3)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectDate(ts) {
+  selectedDate = new Date(ts);
+  selectedTime = null;
+  renderCalendar();
+  renderTimeGrid();
+  updateBookingSummary();
+}
+
+const ALL_TIMES = [
+  '09:00','09:30','10:00','10:30','11:00','11:30',
+  '12:00','12:30','14:00','14:30','15:00','15:30',
+  '16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'
+];
+
+function renderTimeGrid() {
+  document.getElementById('time-grid').innerHTML = ALL_TIMES.map(t => {
+    const taken    = TAKEN_TIMES.includes(t);
+    const selected = selectedTime === t;
+    return `
+      <div class="time-slot ${taken ? 'taken' : ''} ${selected ? 'active' : ''}"
+           onclick="${taken ? '' : `selectTime('${t}')`}">
+        ${t}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectTime(t) {
+  selectedTime = t;
+  renderTimeGrid();
+  updateBookingSummary();
+}
+
+function changeMonth(d) {
+  bookingMonth.setMonth(bookingMonth.getMonth() + d);
+  renderCalendar();
+}
+
+function updateBookingSummary() {
+  const dateEl = document.getElementById('bs-date');
+  const timeEl = document.getElementById('bs-time');
+  const btn    = document.getElementById('btn-save');
+
+  dateEl.textContent = selectedDate
+    ? `${DIAS_ES[selectedDate.getDay()]} ${selectedDate.getDate()} ${MESES_ES[selectedDate.getMonth()].slice(0,3)}`
+    : '—';
+
+  timeEl.textContent = selectedTime || '—';
+  btn.disabled = !(selectedDate && selectedTime);
+}
+
+function confirmBooking() {
+  if (!selectedDate || !selectedTime) return;
+
+  const active = currentBarber.services.filter(s => s.on);
+  const svcNames = active.map(s => s.name).join(', ') || currentBarber.services[0].name;
+  const total = active.reduce((a,s) => a+s.price, 0) || currentBarber.services[0].price;
+  const dateStr = `${DIAS_ES[selectedDate.getDay()]} ${selectedDate.getDate()} ${MESES_ES[selectedDate.getMonth()]} · ${selectedTime}`;
+
+  document.getElementById('cc-barber').textContent = currentBarber.name;
+  document.getElementById('cc-date').textContent   = dateStr;
+  document.getElementById('cc-svc').textContent    = svcNames;
+  document.getElementById('cc-total').textContent  = fmt(total);
+
+  /* close panels on desktop */
+  ['barber','booking'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('overlay-bg').classList.remove('visible');
+  nav = nav.filter(s => s !== 'barber' && s !== 'booking');
+
+  goTo('confirm');
+}
+
+function shareWhatsapp() {
+  const barber  = document.getElementById('cc-barber').textContent;
+  const date    = document.getElementById('cc-date').textContent;
+  const svc     = document.getElementById('cc-svc').textContent;
+  const total   = document.getElementById('cc-total').textContent;
+  const msg     = encodeURIComponent(
+    `¡Hola! 👋 Quiero confirmar mi reserva en La Tijera Maulina:\n\n✂️ Barbero: ${barber}\n📅 Fecha: ${date}\n💈 Servicio: ${svc}\n💵 Total: ${total}\n\n📍 Av. Valentín Letelier 420, Linares`
+  );
+  window.open(`https://wa.me/56987654321?text=${msg}`, '_blank');
+}
+
+/* ── SEARCH ─────────────────────────────────────── */
+function searchBarbers(q) {
+  const t = q.trim().toLowerCase();
+  renderBarbers(t
+    ? BARBERS.filter(b =>
+        b.name.toLowerCase().includes(t) ||
+        b.title.toLowerCase().includes(t) ||
+        b.services.some(s => s.name.toLowerCase().includes(t)))
+    : BARBERS);
+}
+
+/* ── RESET ──────────────────────────────────────── */
+function resetApp() {
+  selectedDate = null; selectedTime = null; currentBarber = null;
+  nav = ['home'];
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('overlay-bg').classList.remove('visible');
+  document.getElementById('home').classList.remove('hidden');
+}
+
+/* ── GREETING ───────────────────────────────────── */
+(function() {
+  const h = new Date().getHours();
+  const el = document.getElementById('greeting-day');
+  if (el) el.textContent = h < 12 ? 'Buenos días ☀️' : h < 20 ? 'Buenas tardes 🌤️' : 'Buenas noches 🌙';
+})();
+
+/* ── FORMAT ─────────────────────────────────────── */
+function fmt(n) { return '$' + n.toLocaleString('es-CL'); }
+
+/* ── TOAST ──────────────────────────────────────── */
+let tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ── RIPPLE ─────────────────────────────────────── */
+document.querySelectorAll('.rc').forEach(el => {
+  el.addEventListener('click', function(e) {
+    const r = this.getBoundingClientRect();
+    const d = Math.max(r.width, r.height);
+    const rp = document.createElement('span');
+    rp.className = 're';
+    rp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+    this.appendChild(rp);
+    rp.addEventListener('animationend', () => rp.remove());
+  });
+});
+
+/* ── INIT BOOKING ───────────────────────────────── */
+renderCalendar();
+renderTimeGrid();
+
+/* ── RESIZE HANDLER ─────────────────────────────── */
+let lastW = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (Math.abs(window.innerWidth - lastW) > 100) {
+    /* reset on breakpoint cross */
+    ['barber','booking'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById('overlay-bg').classList.remove('visible');
+    nav = nav.filter(s => s !== 'barber' && s !== 'booking');
+    lastW = window.innerWidth;
+  }
+});
+</script>
+</body>
+</html>
